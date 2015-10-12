@@ -19,9 +19,9 @@ use pocketmine\level\Position;
 use pocketmine\item\Item;
 use pocketmine\network\protocol\RemoveEntityPacket;
 use pocketmine\event\player\PlayerQuitEvent;
-use pocketmine\network\protocol\AddPlayerPacket;
-use pocketmine\network\protocol\RemovePlayerPacket;
+use pocketmine\network\protocol\AddEntityPacket;
 use ifteam\CreativeEconomy\task\CreativeEconomyTask;
+use pocketmine\entity\Item as ItemEntity;
 
 class CreativeEconomy extends PluginBase implements Listener {
 	private static $instance = null;
@@ -88,35 +88,25 @@ class CreativeEconomy extends PluginBase implements Listener {
 		
 		$this->packet ["RemoveEntityPacket"] = new RemoveEntityPacket ();
 		
-		$this->packet ["AddPlayerPacket"] = new AddPlayerPacket ();
-		$this->packet ["AddPlayerPacket"]->clientID = 0;
-		$this->packet ["AddPlayerPacket"]->yaw = 0;
-		$this->packet ["AddPlayerPacket"]->pitch = 0;
-		$this->packet ["AddPlayerPacket"]->item = 0;
-		$this->packet ["AddPlayerPacket"]->meta = 0;
-		$this->packet ["AddPlayerPacket"]->slim = \false;
-		$this->packet ["AddPlayerPacket"]->skin = \str_repeat ( "\x00", 64 * 32 * 4 );
-		$this->packet ["AddPlayerPacket"]->metadata = [ 
-				Entity::DATA_FLAGS => [ 
-						Entity::DATA_TYPE_BYTE,
-						1 << Entity::DATA_FLAG_INVISIBLE 
-				],
-				Entity::DATA_AIR => [ 
-						Entity::DATA_TYPE_SHORT,
-						300 
-				],
-				Entity::DATA_SHOW_NAMETAG => [ 
-						Entity::DATA_TYPE_BYTE,
-						1 
-				],
-				Entity::DATA_NO_AI => [ 
-						Entity::DATA_TYPE_BYTE,
-						1 
-				] 
+		$this->packet ["AddEntityPacket"] = new AddEntityPacket();
+		$this->packet ["AddEntityPacket"]->eid = 0;
+		$this->packet ["AddEntityPacket"]->type = ItemEntity::NETWORK_ID;
+		$this->packet ["AddEntityPacket"]->x = 0;
+		$this->packet ["AddEntityPacket"]->y = 0;
+		$this->packet ["AddEntityPacket"]->z = 0;
+		$this->packet ["AddEntityPacket"]->speedX = 0;
+		$this->packet ["AddEntityPacket"]->speedY = 0;
+		$this->packet ["AddEntityPacket"]->speedZ = 0;
+		$this->packet ["AddEntityPacket"]->yaw = 0;
+		$this->packet ["AddEntityPacket"]->pitch = 0;
+		$this->packet ["AddEntityPacket"]->item = 0;
+		$this->packet ["AddEntityPacket"]->meta = 0;
+		$this->packet ["AddEntityPacket"]->metadata = [
+				Entity::DATA_FLAGS => [Entity::DATA_TYPE_BYTE, 1 << Entity::DATA_FLAG_INVISIBLE],
+				Entity::DATA_NAMETAG => [Entity::DATA_TYPE_STRING, ""],
+				Entity::DATA_SHOW_NAMETAG => [Entity::DATA_TYPE_BYTE, 1],
+				Entity::DATA_NO_AI => [Entity::DATA_TYPE_BYTE, 1]
 		];
-		
-		$this->packet ["RemovePlayerPacket"] = new RemovePlayerPacket ();
-		$this->packet ["RemovePlayerPacket"]->clientID = 0;
 		
 		// TESTCODE
 		// foreach ( Item::$list as $index => $data ) {
@@ -241,8 +231,8 @@ class CreativeEconomy extends PluginBase implements Listener {
 			}
 			unset ( $this->db ["showCase"] ["{$block->x}.{$block->y}.{$block->z}"] );
 			if (isset ( $this->packetQueue [$player->getName ()] ["nametag"] ["{$block->x}.{$block->y}.{$block->z}"] )) {
-				$this->packet ["RemovePlayerPacket"]->eid = $this->packetQueue [$player->getName ()] ["nametag"] ["{$block->x}.{$block->y}.{$block->z}"];
-				$player->dataPacket ( $this->packet ["RemovePlayerPacket"] ); // 제거패킷 전송
+				$this->packet ["RemoveEntityPacket"]->eid = $this->packetQueue [$player->getName ()] ["nametag"] ["{$block->x}.{$block->y}.{$block->z}"];
+				$player->dataPacket ( $this->packet ["RemoveEntityPacket"] ); // 네임택 제거패킷 전송
 			}
 			if (isset ( $this->packetQueue [$player->getName ()] ["{$block->x}.{$block->y}.{$block->z}"] )) {
 				$this->packet ["RemoveEntityPacket"]->eid = $this->packetQueue [$player->getName ()] ["{$block->x}.{$block->y}.{$block->z}"];
@@ -783,8 +773,8 @@ class CreativeEconomy extends PluginBase implements Listener {
 						unset ( $this->packetQueue [$player->getName ()] [$marketPos] );
 					}
 					if (isset ( $this->packetQueue [$player->getName ()] ["nametag"] [$marketPos] )) {
-						$this->packet ["RemovePlayerPacket"]->eid = $this->packetQueue [$player->getName ()] ["nametag"] [$marketPos];
-						$player->dataPacket ( $this->packet ["RemovePlayerPacket"] ); // 네임택 제거패킷 전송
+						$this->packet ["RemoveEntityPacket"]->eid = $this->packetQueue [$player->getName ()] ["nametag"] [$marketPos];
+						$player->dataPacket ( $this->packet ["RemoveEntityPacket"] ); // 네임택 제거패킷 전송
 						unset ( $this->packetQueue [$player->getName ()] ["nametag"] [$marketPos] );
 					}
 					continue;
@@ -837,16 +827,15 @@ class CreativeEconomy extends PluginBase implements Listener {
 							continue;
 						$nameTag = $itemName . "\n" . $this->get ( "price" ) . " : " . $marketprice;
 						$this->packetQueue [$player->getName ()] ["nametag"] [$marketPos] = Entity::$entityCount ++;
-						$this->packet ["AddPlayerPacket"]->eid = $this->packetQueue [$player->getName ()] ["nametag"] [$marketPos];
-						$this->packet ["AddPlayerPacket"]->clientID = $this->packetQueue [$player->getName ()] ["nametag"] [$marketPos];
-						$this->packet ["AddPlayerPacket"]->username = $nameTag;
-						$this->packet ["AddPlayerPacket"]->x = $explode [0] + 0.4;
-						$this->packet ["AddPlayerPacket"]->y = $explode [1] - 3.2;
-						$this->packet ["AddPlayerPacket"]->z = $explode [2] + 0.4;
-						$player->dataPacket ( $this->packet ["AddPlayerPacket"] );
+						$this->packet ["AddEntityPacket"]->eid = $this->packetQueue [$player->getName ()] ["nametag"] [$marketPos];
+						$this->packet ["AddEntityPacket"]->metadata[Entity::DATA_NAMETAG] = [Entity::DATA_TYPE_STRING, $nameTag];
+						$this->packet ["AddEntityPacket"]->x = $explode [0] + 0.4;
+						$this->packet ["AddEntityPacket"]->y = $explode [1] - 1.2;
+						$this->packet ["AddEntityPacket"]->z = $explode [2] + 0.4;
+						$player->dataPacket ( $this->packet ["AddEntityPacket"] );
 					} else if (isset ( $this->packetQueue [$player->getName ()] ["nametag"] [$marketPos] )) {
-						$this->packet ["RemovePlayerPacket"]->eid = $this->packetQueue [$player->getName ()] ["nametag"] [$marketPos];
-						$player->dataPacket ( $this->packet ["RemovePlayerPacket"] ); // 네임택 제거패킷 전송
+						$this->packet ["RemoveEntityPacket"]->eid = $this->packetQueue [$player->getName ()] ["nametag"] [$marketPos];
+						$player->dataPacket ( $this->packet ["RemoveEntityPacket"] ); // 네임택 제거패킷 전송
 						unset ( $this->packetQueue [$player->getName ()] ["nametag"] [$marketPos] );
 					}
 				}
