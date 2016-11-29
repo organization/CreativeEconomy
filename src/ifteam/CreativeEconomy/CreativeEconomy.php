@@ -102,10 +102,10 @@ class CreativeEconomy extends PluginBase implements Listener {
 		$this->packet ["AddEntityPacket"]->item = 0;
 		$this->packet ["AddEntityPacket"]->meta = 0;
 		$this->packet ["AddEntityPacket"]->metadata = [
-				Entity::DATA_FLAGS => [Entity::DATA_TYPE_BYTE, 1 << Entity::DATA_FLAG_INVISIBLE],
-				Entity::DATA_NAMETAG => [Entity::DATA_TYPE_STRING, ""],
-				Entity::DATA_SHOW_NAMETAG => [Entity::DATA_TYPE_BYTE, 1],
-				Entity::DATA_NO_AI => [Entity::DATA_TYPE_BYTE, 1]
+				//Entity::DATA_FLAGS => [Entity::DATA_TYPE_BYTE, 1 << Entity::DATA_FLAG_INVISIBLE],
+				//Entity::DATA_NAMETAG => [Entity::DATA_TYPE_STRING, ""],
+				//Entity::DATA_SHOW_NAMETAG => [Entity::DATA_TYPE_BYTE, 1],
+				//Entity::DATA_NO_AI => [Entity::DATA_TYPE_BYTE, 1]
 		];
 		
 		// TESTCODE
