@@ -85,6 +85,9 @@ class CreativeEconomy extends PluginBase implements Listener {
 		$this->packet ["AddItemEntityPacket"]->yaw = 0;
 		$this->packet ["AddItemEntityPacket"]->pitch = 0;
 		$this->packet ["AddItemEntityPacket"]->roll = 0;
+		$this->packet ["AddItemEntityPacket"]->speedX = 0;
+		$this->packet ["AddItemEntityPacket"]->speedY = 0;
+		$this->packet ["AddItemEntityPacket"]->speddZ = 0;
 		
 		$this->packet ["RemoveEntityPacket"] = new RemoveEntityPacket ();
 		
@@ -101,11 +104,14 @@ class CreativeEconomy extends PluginBase implements Listener {
 		$this->packet ["AddEntityPacket"]->pitch = 0;
 		$this->packet ["AddEntityPacket"]->item = 0;
 		$this->packet ["AddEntityPacket"]->meta = 0;
+		$flags = 0;
+		$flags |= 1 << Entity::DATA_FLAG_INVISIBLE;
+		$flags |= 1 << Entity::DATA_FLAG_CAN_SHOW_NAMETAG;
+		$flags |= 1 << Entity::DATA_FLAG_ALWAYS_SHOW_NAMETAG;
+		$flags |= 1 << Entity::DATA_FLAG_IMMOBILE;
 		$this->packet ["AddEntityPacket"]->metadata = [
-				//Entity::DATA_FLAGS => [Entity::DATA_TYPE_BYTE, 1 << Entity::DATA_FLAG_INVISIBLE],
-				//Entity::DATA_NAMETAG => [Entity::DATA_TYPE_STRING, ""],
-				//Entity::DATA_SHOW_NAMETAG => [Entity::DATA_TYPE_BYTE, 1],
-				//Entity::DATA_NO_AI => [Entity::DATA_TYPE_BYTE, 1]
+				Entity::DATA_FLAGS => [Entity::DATA_TYPE_LONG, $flags],
+				Entity::DATA_NAMETAG => [Entity::DATA_TYPE_STRING, ""]
 		];
 		
 		// TESTCODE
